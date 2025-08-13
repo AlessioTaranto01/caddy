@@ -2,15 +2,24 @@
 FROM golang:1.24-alpine AS builder
 
 # Install git and other build dependencies
-RUN apk add --no-cache git
+RUN apk add --no-cache git ca-certificates
+
+# Set Go proxy and module settings to avoid timeout issues
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=sum.golang.org
+ENV GOPRIVATE=""
+ENV GOTIMEOUT=300s
 
 # Install xcaddy
 RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 
-# Build Caddy with required modules
-RUN xcaddy build v2.8.4 \
-    --with github.com/lucaslorentz/caddy-docker-proxy/v2@v2.9.1 \
-    --with github.com/mholt/caddy-l4@latest
+# Build Caddy with required modules with retry logic
+RUN for i in 1 2 3; do \
+        xcaddy build v2.8.4 \
+            --with github.com/lucaslorentz/caddy-docker-proxy/v2@v2.9.1 \
+            --with github.com/mholt/caddy-l4@latest && break || \
+        (echo "Build attempt $i failed, retrying in 10 seconds..." && sleep 10); \
+    done
 
 # Use official Caddy image as base
 FROM caddy:2.8-alpine

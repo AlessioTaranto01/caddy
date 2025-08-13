@@ -10,7 +10,7 @@ RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 # Build Caddy with required modules
 RUN xcaddy build v2.8.4 \
     --with github.com/lucaslorentz/caddy-docker-proxy/v2@v2.9.1 \
-    --with github.com/mholt/caddy-l4@v0.0.0-20240606002807-9c79e6a80a96
+    --with github.com/mholt/caddy-l4@latest
 
 # Use official Caddy image as base
 FROM caddy:2.8-alpine

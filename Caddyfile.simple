@@ -9,7 +9,9 @@
 
 # Layer 4 TCP proxy configuration
 :7102 {
-	proxy tcp://dev-authcache:7102
+	layer4 {
+		proxy tcp://dev-authcache:7102
+	}
 }
 
 # The caddy-docker-proxy module automatically generates configurations from Docker labels.

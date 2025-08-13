@@ -7,34 +7,32 @@
 	}
 }
 
-# Layer 4 TCP proxy configuration
-:7102 {
-	layer4 {
-		proxy tcp://dev-authcache:7102
-	}
-}
-
 # The caddy-docker-proxy module automatically generates configurations from Docker labels.
 # No global configuration is needed - the plugin scans Docker containers/services automatically.
+#
+# NOTE: Layer 4 (TCP/UDP) proxying with caddy-l4 module requires JSON configuration.
+# The caddy-l4 module does not support Caddyfile format. For Layer 4 proxying,
+# you need to use JSON configuration or adapt the Caddyfile to JSON and merge
+# with Layer 4 configuration.
 # 
-# For a service with labels:
+# For HTTP services with Docker labels:
 # caddy: test.hoponmobility.com
-# caddy.reverse_proxy: tcp://:7102
+# caddy.reverse_proxy: '{{upstreams 8080}}'
 # caddy.tls: internal
 # 
 # This will create:
 # test.hoponmobility.com {
-#     reverse_proxy tcp://:7102
+#     reverse_proxy {{upstreams 8080}}
 #     tls internal
 # }
 #
-# For HTTP services:
+# For additional HTTP services:
 # caddy_1: admin.test.hoponmobility.com
-# caddy_1.reverse_proxy: dev-authcache:9102
+# caddy_1.reverse_proxy: '{{upstreams 9102}}'
 # 
 # This will create:
 # admin.test.hoponmobility.com {
-#     reverse_proxy dev-authcache:9102
+#     reverse_proxy {{upstreams 9102}}
 # }
 
 # Default response for unmatched requests

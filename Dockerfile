@@ -1,6 +1,9 @@
 # Use golang image with newer Go version for building
 FROM golang:1.24-alpine AS builder
 
+# Install git and other build dependencies
+RUN apk add --no-cache git
+
 # Install xcaddy
 RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 

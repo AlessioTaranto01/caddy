@@ -1,0 +1,56 @@
+{
+	# Global options
+	admin localhost:2019
+	log {
+		level INFO
+		format console
+	}
+
+	# Enable Docker provider for automatic service discovery
+	docker_proxy {
+		docker_host unix:///var/run/docker.sock
+		network caddy
+		label_prefix caddy
+		polling_interval 5s
+		process_caddyfile true
+	}
+
+	# Enable Layer 4 proxy for TCP connections
+	layer4 {
+		:7102 {
+			proxy {
+				upstream tcp://dev-authcache:7102
+			}
+		}
+	}
+}
+
+# The docker_proxy module will automatically generate configurations from Docker labels:
+# 
+# For a service with labels:
+# caddy_0: test.hoponmobility.com
+# caddy_0.reverse_proxy: tcp://:7102
+# caddy_0.tls_internal_ask: 'true'
+# 
+# This will create:
+# test.hoponmobility.com {
+#     reverse_proxy tcp://:7102
+#     tls internal {
+#         ask
+#     }
+# }
+#
+# For HTTP services:
+# caddy_1: admin.test.hoponmobility.com
+# caddy_1.reverse_proxy: '{{upstreams 9102}}'
+# 
+# This will create:
+# admin.test.hoponmobility.com {
+#     reverse_proxy {{upstreams 9102}}
+# }
+
+# Default response for unmatched requests
+:80 {
+	respond "Caddy Proxy Server is running" 200
+	header Content-Type "text/plain"
+}

@@ -1,0 +1,54 @@
+version: '3.8'
+
+networks:
+  caddy:
+    external: true
+  default:
+    driver: bridge
+
+services:
+  caddy:
+    build: .
+    image: myimage/caddy-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2019:2019"  # Admin API
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - caddy
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    restart: unless-stopped
+
+  # Example service using the label syntax
+  dev-authcache:
+    image: myimage/test
+    networks:
+      - caddy
+      - default
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        caddy_0: test.hoponmobility.com
+        caddy_0.reverse_proxy: tcp://:7102
+        caddy_0.tls_internal_ask: 'true'
+        caddy_1: admin.test.hoponmobility.com
+        caddy_1.reverse_proxy: '{{upstreams 9102}}'
+      placement:
+        constraints:
+          - node.hostname == sd-165633
+    ports:
+      - "7102:7102"
+      - "9102:9102"
+
+volumes:
+  caddy_data:
+  caddy_config:

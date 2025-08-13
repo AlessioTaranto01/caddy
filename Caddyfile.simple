@@ -5,14 +5,6 @@
 		level INFO
 		format console
 	}
-
-	# Enable Docker provider for automatic service discovery (v0.3.6 syntax)
-	docker {
-		docker_host unix:///var/run/docker.sock
-		network caddy
-		label_prefix caddy
-		polling_interval 5s
-	}
 }
 
 # Layer 4 TCP proxy configuration
@@ -20,7 +12,8 @@
 	proxy tcp://dev-authcache:7102
 }
 
-# The docker module will automatically generate configurations from Docker labels:
+# The caddy-docker-proxy module automatically generates configurations from Docker labels.
+# No global configuration is needed - the plugin scans Docker containers/services automatically.
 # 
 # For a service with labels:
 # caddy: test.hoponmobility.com

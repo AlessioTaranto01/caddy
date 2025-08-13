@@ -5,25 +5,15 @@
 		level INFO
 		format console
 	}
-
-	# Enable Docker provider for automatic service discovery (v2 syntax)
-	docker {
-		docker_host unix:///var/run/docker.sock
-		network caddy
-		label_prefix caddy
-		polling_interval 5s
-		process_caddyfile true
-	}
-
-	# Enable Layer 4 proxy for TCP connections
-	layer4 {
-		:7102 {
-			proxy tcp://dev-authcache:7102
-		}
-	}
 }
 
-# The docker_proxy module will automatically generate configurations from Docker labels:
+# Layer 4 TCP proxy configuration
+:7102 {
+	proxy tcp://dev-authcache:7102
+}
+
+# The caddy-docker-proxy module automatically generates configurations from Docker labels.
+# No global configuration is needed - the plugin scans Docker containers/services automatically.
 # 
 # For a service with labels:
 # caddy_0: test.mydomain.com

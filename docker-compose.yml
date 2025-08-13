@@ -37,10 +37,10 @@ services:
       driver: json-file
     deploy:
       labels:
-        caddy_0: test.hoponmobility.com
+        caddy_0: test.mydomain.com
         caddy_0.reverse_proxy: tcp://:7102
         caddy_0.tls_internal_ask: 'true'
-        caddy_1: admin.test.hoponmobility.com
+        caddy_1: admin.test.mydomain.com
         caddy_1.reverse_proxy: '{{upstreams 9102}}'
       placement:
         constraints:

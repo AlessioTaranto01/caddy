@@ -28,12 +28,12 @@
 # The docker_proxy module will automatically generate configurations from Docker labels:
 # 
 # For a service with labels:
-# caddy_0: test.hoponmobility.com
+# caddy_0: test.mydomain.com
 # caddy_0.reverse_proxy: tcp://:7102
 # caddy_0.tls_internal_ask: 'true'
 # 
 # This will create:
-# test.hoponmobility.com {
+# test.mydomain.com {
 #     reverse_proxy tcp://:7102
 #     tls internal {
 #         ask
@@ -41,11 +41,11 @@
 # }
 #
 # For HTTP services:
-# caddy_1: admin.test.hoponmobility.com
+# caddy_1: admin.test.mydomain.com
 # caddy_1.reverse_proxy: '{{upstreams 9102}}'
 # 
 # This will create:
-# admin.test.hoponmobility.com {
+# admin.test.mydomain.com {
 #     reverse_proxy {{upstreams 9102}}
 # }
 

@@ -1,0 +1,101 @@
+name: CI/CD with Swarmpit
+
+on:
+  push:
+    branches:
+      - main
+      - development
+      - release/*
+      - hotfix/*
+      - feature/*
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Test Docker Build
+      run: |
+        docker build -t caddy-proxy-test .
+
+    - name: Test Caddy Configuration
+      run: |
+        docker run --rm caddy-proxy-test caddy validate --config /etc/caddy/Caddyfile
+
+    - name: Run Basic Container Test
+      run: |
+        # Start container in background
+        docker run -d --name caddy-test -p 8080:80 caddy-proxy-test
+        
+        # Wait for startup
+        sleep 10
+        
+        # Test if Caddy is responding
+        curl -f http://localhost:8080 || exit 1
+        
+        # Cleanup
+        docker stop caddy-test
+        docker rm caddy-test
+
+  build-and-deploy:
+    name: Build, Push, and Deploy with Swarmpit
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
+    needs: test
+
+    env:
+      DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/caddy-proxy:${{ github.ref_name }}
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t $DOCKER_IMAGE .
+        docker push $DOCKER_IMAGE
+
+    - name: Deploy to Swarmpit
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "Deploying $DOCKER_IMAGE to production via Swarmpit"
+        # Add your Swarmpit deployment commands here
+        # Example: curl -X POST "${{ secrets.SWARMPIT_API_URL }}/services/update" \
+        #   -H "Authorization: Bearer ${{ secrets.SWARMPIT_TOKEN }}" \
+        #   -H "Content-Type: application/json" \
+        #   -d '{"image": "'$DOCKER_IMAGE'"}'
+
+    - name: Deploy to Development
+      if: github.ref == 'refs/heads/development'
+      run: |
+        echo "Deploying $DOCKER_IMAGE to development via Swarmpit"
+        # Add your development deployment commands here
+
+    - name: Notify Deployment Status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment successful for $DOCKER_IMAGE"
+        else
+          echo "❌ Deployment failed for $DOCKER_IMAGE"
+        fi

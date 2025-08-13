@@ -84,9 +84,11 @@ docker network create caddy
 
 ## Deployment
 
+### Local Development
+
 1. Build the image:
    ```bash
-   docker build -t myimage/caddy-proxy .
+   ./build.sh
    ```
 
 2. Deploy with Docker Compose:
@@ -94,10 +96,54 @@ docker network create caddy
    docker-compose up -d
    ```
 
-3. For Docker Swarm:
+3. Test the setup:
    ```bash
-   docker stack deploy -c docker-compose.yml caddy-stack
+   ./test.sh
    ```
+
+### Production Deployment
+
+#### Manual Deployment
+
+For Docker Swarm:
+```bash
+# Initialize swarm if not already done
+docker swarm init
+
+# Deploy using the deployment script
+./deploy.sh
+```
+
+#### CI/CD Pipeline
+
+The repository includes a GitHub Actions workflow that:
+
+1. **Tests**: Validates Caddy configuration and runs container tests
+2. **Builds**: Creates and pushes Docker images to Docker Hub
+3. **Deploys**: Automatically deploys to Swarmpit-managed environments
+
+**Required Secrets:**
+- `DOCKER_USERNAME`: Docker Hub username
+- `DOCKER_PASSWORD`: Docker Hub password
+- `SWARMPIT_API_URL`: Swarmpit API endpoint (optional)
+- `SWARMPIT_TOKEN`: Swarmpit authentication token (optional)
+
+**Deployment Triggers:**
+- `main` branch: Deploys to production
+- `development` branch: Deploys to development environment
+- Feature branches: Runs tests only
+
+#### Environment Variables for Deployment
+
+```bash
+export DOCKER_IMAGE="myimage/caddy-proxy:latest"
+export STACK_NAME="caddy-stack"
+export ENVIRONMENT="production"
+export SWARMPIT_API_URL="https://your-swarmpit.com/api"
+export SWARMPIT_TOKEN="your-token"
+
+./deploy.sh
+```
 
 ## Modules Included
 

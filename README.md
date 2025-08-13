@@ -12,9 +12,24 @@ This repository contains a custom Caddy Docker image that supports both TCP and 
 
 ## Building the Image
 
+### Option 1: Latest Versions (Recommended)
+
+Uses Go 1.24 and the latest module versions:
+
 ```bash
 docker build -t myimage/caddy-proxy .
 ```
+
+### Option 2: Compatible Versions (Fallback)
+
+If you encounter Go version compatibility issues, use the simple Dockerfile:
+
+```bash
+docker build -f Dockerfile.simple -t myimage/caddy-proxy .
+cp Caddyfile.simple Caddyfile
+```
+
+**Note**: The v2 docker-proxy module requires Go 1.24+. If your environment doesn't support this, use the simple version with v0.3.6 of the docker-proxy module.
 
 ## Usage with Docker Compose
 

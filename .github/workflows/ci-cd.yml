@@ -1,4 +1,4 @@
-name: CI/CD with Swarmpit
+name: CI/CD Pipeline
 
 on:
   push:
@@ -48,8 +48,8 @@ jobs:
         docker stop caddy-test
         docker rm caddy-test
 
-  build-and-deploy:
-    name: Build, Push, and Deploy with Swarmpit
+  build-and-push:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
     needs: test
@@ -74,28 +74,4 @@ jobs:
       run: |
         docker build -t $DOCKER_IMAGE .
         docker push $DOCKER_IMAGE
-
-    - name: Deploy to Swarmpit
-      if: github.ref == 'refs/heads/main'
-      run: |
-        echo "Deploying $DOCKER_IMAGE to production via Swarmpit"
-        # Add your Swarmpit deployment commands here
-        # Example: curl -X POST "${{ secrets.SWARMPIT_API_URL }}/services/update" \
-        #   -H "Authorization: Bearer ${{ secrets.SWARMPIT_TOKEN }}" \
-        #   -H "Content-Type: application/json" \
-        #   -d '{"image": "'$DOCKER_IMAGE'"}'
-
-    - name: Deploy to Development
-      if: github.ref == 'refs/heads/development'
-      run: |
-        echo "Deploying $DOCKER_IMAGE to development via Swarmpit"
-        # Add your development deployment commands here
-
-    - name: Notify Deployment Status
-      if: always()
-      run: |
-        if [ "${{ job.status }}" == "success" ]; then
-          echo "✅ Deployment successful for $DOCKER_IMAGE"
-        else
-          echo "❌ Deployment failed for $DOCKER_IMAGE"
-        fi
+        echo "✅ Successfully built and pushed $DOCKER_IMAGE"

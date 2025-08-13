@@ -6,8 +6,8 @@
 		format console
 	}
 
-	# Enable Docker provider for automatic service discovery
-	docker_proxy {
+	# Enable Docker provider for automatic service discovery (v2 syntax)
+	docker {
 		docker_host unix:///var/run/docker.sock
 		network caddy
 		label_prefix caddy
@@ -18,9 +18,7 @@
 	# Enable Layer 4 proxy for TCP connections
 	layer4 {
 		:7102 {
-			proxy {
-				upstream tcp://dev-authcache:7102
-			}
+			proxy tcp://dev-authcache:7102
 		}
 	}
 }
